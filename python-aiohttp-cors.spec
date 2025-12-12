@@ -5,7 +5,7 @@
 
 Name:		python-aiohttp-cors
 Version:	0.8.1
-Release:	1
+Release:	2
 Summary:	CORS support for aiohttp
 URL:		https://pypi.org/project/aiohttp-cors/
 License:	Apache-2.0
