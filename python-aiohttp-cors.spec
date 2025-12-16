@@ -1,7 +1,7 @@
 %define module aiohttp-cors
 %define oname aiohttp_cors
 # disable test for abf.
-%bcond_with test
+%bcond test 0
 
 Name:		python-aiohttp-cors
 Version:	0.8.1
@@ -14,9 +14,11 @@ Source0:	https://files.pythonhosted.org/packages/source/a/aiohttp-cors/%{oname}-
 BuildSystem:	python
 BuildArch:	noarch
 
-BuildRequires:	python
-BuildRequires:  pkgconfig(python3)
+BuildRequires:	pkgconfig
+BuildRequires:  pkgconfig(python)
+BuildRequires:	python%{pyver}dist(pip)
 BuildRequires:	python%{pyver}dist(setuptools)
+BuildRequires:	python%{pyver}dist(wheel)
 %if %{with test}
 BuildRequires:	python%{pyver}dist(aiohttp)
 BuildRequires:	python%{pyver}dist(aiosignal)
@@ -41,6 +43,8 @@ for aiohttp asyncio-powered asynchronous HTTP server.
 
 %prep
 %autosetup -p1 -n %{oname}-%{version}
+# Remove bundled egg-info
+rm -rf %{oname}.egg-info
 # remove code coverage flags from pytest
 sed -i '/addopts/d' setup.cfg
 
@@ -48,15 +52,17 @@ sed -i '/addopts/d' setup.cfg
 %py_build
 
 %install
-%py3_install
+%py_install
 
 %if %{with test}
 %check
-%{__python} -m pytest -v tests/unit --ignore tests/integration/test_real_browser.py
+export CI=true
+export PYTHONPATH="%{buildroot}%{python_sitearch}:${PWD}"
+pytest -v tests/unit --ignore tests/integration/test_real_browser.py
 %endif
 
 %files
-%{python3_sitelib}/%{oname}
-%{python3_sitelib}/%{oname}-%{version}-*.*-info
+%{python_sitelib}/%{oname}
+%{python_sitelib}/%{oname}-%{version}-*.*-info
 %license LICENSE
 %doc README.rst
